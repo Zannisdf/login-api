@@ -1,4 +1,5 @@
 class UsersController < ApplicationController
+  before_action :authorize_request, except: :create
   before_action :set_user, only: %i[show update destroy]
 
   def index
@@ -32,15 +33,6 @@ class UsersController < ApplicationController
     @user.destroy
   end
 
-  def me
-    @user = User.find_by(email: user_params[:email])  
-    if (@user.present?)
-      render_without_password(@user)
-    else
-      render json: { errors: 'User not found' }, status: :not_found
-    end
-  end
-
   private
 
   def render_without_password(user)
@@ -48,7 +40,7 @@ class UsersController < ApplicationController
   end
 
   def set_user
-    @user = User.find(params[:id])
+    @user = @currentUser
     rescue ActiveRecord::RecordNotFound
       render json: { errors: 'User not found' }, status: :not_found
   end
